@@ -17,7 +17,7 @@ export default class Login extends Component {
       show_password: false,
       error: '',
       is_loading: false,
-      is_mounted: false
+      is_mounted: false,
     }
   }
 
@@ -123,7 +123,7 @@ export default class Login extends Component {
   }
 
   render() {
-    return (
+    return ( 
       <View style={{height: '100%'}}>
         {
           this.state.is_loading

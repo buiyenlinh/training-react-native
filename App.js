@@ -39,9 +39,12 @@
     getData = async () => {
       try {
         const token = await AsyncStorage.getItem('@token')
-        this.setState({
-          access_token: token
-        })
+        if (token) {
+          this.setState({
+            access_token: token,
+            isLogin: true
+          })
+        }
       } catch(e) {
         console.log("error getdata " + e);
       }
@@ -64,7 +67,6 @@
       return (
         <View>
           {!this.state.isLogin
-
             ? <Login onChangeLogin={this.onChangeLogin}/> 
             : <View style={styles.main}>
                 <TouchableOpacity onPress={this.logout}>
