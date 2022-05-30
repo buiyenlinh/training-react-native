@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { Component } from 'react'
 import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, ScrollView, TouchableHighlight, ActivityIndicator  } from "react-native";
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon1 from 'react-native-vector-icons/FontAwesome';
 export default class Login extends Component {
   constructor(props) {
@@ -17,11 +19,11 @@ export default class Login extends Component {
       is_loading: false,
       is_mounted: false
     }
- }
+  }
 
- componentDidMount() {
-   this.setState({is_mounted: true})
- }
+  componentDidMount() {
+    this.setState({is_mounted: true})
+  }
  
   componentWillUnmount = () => {
     this.setState({is_mounted: false})
@@ -96,8 +98,10 @@ export default class Login extends Component {
     },
     ).then(response => {
       if (response.data.status) {
-        this.props.setToken(response.data.data.token_type + ' ' + response.data.data.access_token)
+        let token = response.data.data.token_type + ' ' + response.data.data.access_token;
         this.props.onChangeLogin(true);
+
+        this.storeData(token)
       } else {
         this.setState({
           error: response.data.errors,
@@ -109,6 +113,14 @@ export default class Login extends Component {
       this.setState({is_loading: false})
     })
   } 
+
+  storeData = async (value) => {
+    try {
+      await AsyncStorage.setItem('@token', value)
+    } catch (e) {
+      console.log('error store data' + e);
+    }
+  }
 
   render() {
     return (
