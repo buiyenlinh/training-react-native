@@ -7,6 +7,7 @@ import Icon1 from 'react-native-vector-icons/FontAwesome';
 import moment from "moment";
 import DatePicker from 'react-native-neat-date-picker'
 import ItemReportList from './ItemReportList';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class List extends Component {
   constructor(props) {
@@ -14,7 +15,6 @@ export default class List extends Component {
     this.state = {
       departments: [],
       searchStatus: null,
-      is_mounted: false,
       commonCode: [],
       showDatePicker: false,
       datePicker: {
@@ -64,16 +64,15 @@ export default class List extends Component {
     if (this.state?.datePicker?.endDate > 0 && this.state?.datePicker?.startDate > 0) {
       filter['reportTime'] = this.state?.datePicker?.startDate + ', ' + this.state?.datePicker?.endDate
     }
+    const token = await AsyncStorage.getItem('@token');
 
     this.setState({is_loading: true})
     axios.post('https://qlsc.maysoft.io/server/api/getAllReports', filter, {
       headers: {
-        'Authorization': this.props.access_token
+        'Authorization': token
       }
     }).then(response => {
-      if (this.state.is_mounted) {
         this.setState({departments: response.data.data.data})
-      }
     }).catch(err => {
       console.log('Error GetListReports: ' + err);
       this.setState({is_loading: false})
@@ -83,18 +82,17 @@ export default class List extends Component {
   }
 
   getCommonCode = async (_group) => {
+    const token = await AsyncStorage.getItem('@token');
     axios.post('https://qlsc.maysoft.io/server/api/getCommon', {
         groups: _group
       },
       {
         headers: {
-          'Authorization': this.props.access_token
+          'Authorization': token
         }
       }
     ).then(response => {
-      if (this.state.is_mounted) {
-        this.setState({commonCode: response.data.data})
-      }
+      this.setState({commonCode: response.data.data})
     }).catch(err => {
       console.log('Error getCommonCode: ' + err);
     })
@@ -121,13 +119,8 @@ export default class List extends Component {
   }
 
   componentDidMount = () => {
-    this.setState({is_mounted: true});
     this.getListReport();
     this.getCommonCode('incidentObject, reportStatus, reportType');
-  }
-
-  componentWillUnmount = () => {
-    this.setState({is_mounted: false})
   }
 
   getReportStatus = (code) => {

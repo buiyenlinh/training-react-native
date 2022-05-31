@@ -99,16 +99,15 @@ export default class Login extends Component {
     ).then(response => {
       if (response.data.status) {
         let token = response.data.data.token_type + ' ' + response.data.data.access_token;
-        this.props.onChangeLogin(true);
-
         this.storeData(token)
+        this.props.onChangeLogin(true);
       } else {
         this.setState({
           error: response.data.errors,
         })
       }
     }).catch (err => {
-      console.log(err);
+      console.log('Lỗi hàm login: ' + err);
     }).finally(() => {
       this.setState({is_loading: false})
     })

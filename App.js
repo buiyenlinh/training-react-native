@@ -6,7 +6,7 @@
  * @flow strict-local
  */
  import React, { Component } from "react";
- import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+ import { StyleSheet, View } from "react-native";
  import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
  import { NavigationContainer } from '@react-navigation/native';
  import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,10 +30,14 @@
       }
     }
     
-    onChangeLogin = (_status) => {
-      this.setState({
-        isLogin: _status,
-      })
+    onChangeLogin = async (_status) => {
+      const token = await AsyncStorage.getItem('@token')
+      if (token) {
+        this.setState({
+          access_token: token,
+          isLogin: _status
+        })
+      }
     }
 
     getData = async () => {
@@ -43,6 +47,11 @@
           this.setState({
             access_token: token,
             isLogin: true
+          })
+        } else {
+          this.setState({
+            access_token: '',
+            isLogin: false
           })
         }
       } catch(e) {
@@ -54,13 +63,12 @@
       this.getData();
     }
 
-    logout = () => {
+    handleSetLogout = () => {
       AsyncStorage.removeItem('@token');
       this.setState({
         access_token: '',
         isLogin: false
       })
-      console.log('logout')
     }
   
     render() {
@@ -69,9 +77,6 @@
           {!this.state.isLogin
             ? <Login onChangeLogin={this.onChangeLogin}/> 
             : <View style={styles.main}>
-                <TouchableOpacity onPress={this.logout}>
-                  <Text>Đăng xuất</Text>
-                </TouchableOpacity>
                 <NavigationContainer>
                   <Tab.Navigator
                     screenOptions={({ route }) => ({
@@ -110,7 +115,7 @@
                     <Tab.Screen name="Follow" component={Follow} />
                     <Tab.Screen name="Chart" component={Chart} />
                     <Tab.Screen name="Notification" component={Notification} />
-                    <Tab.Screen name="User" component={User} />
+                    <Tab.Screen name="User" children={() => <User handleSetLogout={this.handleSetLogout} />} />
                   </Tab.Navigator>
                 </NavigationContainer>
               </View>}
